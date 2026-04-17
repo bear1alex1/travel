@@ -348,6 +348,18 @@
       font-size: var(--text-xs); font-weight: 700;
       color: var(--color-text-muted);
       font-family: var(--font-display);
+      text-decoration: none; /* Add text-decoration none for link tags */
+    }
+    a.badge {
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    a.badge:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(160,90,40,0.15);
+    }
+    a.badge:active {
+      transform: translateY(0);
     }
     .badge.hotel { background: var(--color-blue-light); border-color: #a8d8f0; color: #2a6f9c; }
     .badge.food  { background: var(--color-green-light); border-color: #9fe5bc; color: #2e7a56; }
@@ -540,10 +552,20 @@
             <div class="timeline-card-body">
               搭捷運前往入住，洗去一天風塵。<br>
               <span style="font-size: 0.85em; color: var(--color-text-faint);">📍 新北市蘆洲區中山一路8號6樓</span>
+              <div style="margin-top: 12px; padding: 10px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                <div style="margin-bottom: 6px;">
+                  <strong style="color: var(--color-primary-active);">🚗 停車資訊：</strong><br>
+                  <span style="color: var(--color-text-muted); font-size: 0.95em;">（徐匯廣場）本身地下停車場，只能停一次，最長 24 小時。</span>
+                </div>
+                <div>
+                  <strong style="color: #2a6f9c;">🧺 洗衣設施：</strong><br>
+                  <span style="color: var(--color-text-muted); font-size: 0.95em;">館內設有自助洗衣房，提供洗衣機與烘衣機（多數旅客回饋為免費使用，非常貼心）。</span>
+                </div>
+              </div>
             </div>
             <div class="badge-row">
-              <span class="badge hotel">🏨 樂樂旅 (Hotel Lele)</span>
-              <span class="badge">🚇 捷運前往</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=新北市蘆洲區中山一路8號6樓" target="_blank" rel="noopener noreferrer" class="badge hotel">🏨 樂樂旅 (Hotel Lele)</a>
+              <a href="https://www.google.com/maps/search/?api=1&query=捷運站" target="_blank" rel="noopener noreferrer" class="badge">🚇 捷運前往</a>
             </div>
           </div>
         </div>
@@ -561,7 +583,7 @@
               </div>
             </div>
             <div class="badge-row">
-              <span class="badge food">🌙 蘆洲廟口夜市</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=蘆洲廟口夜市" target="_blank" rel="noopener noreferrer" class="badge food">🌙 蘆洲廟口夜市</a>
             </div>
           </div>
         </div>
@@ -633,10 +655,20 @@
             <div class="timeline-card-body">
               搭捷運前往入住，泡個舒服的溫泉放鬆身心！<br>
               <span style="font-size: 0.85em; color: var(--color-text-faint);">📍 台北市北投區中山路26號</span>
+              <div style="margin-top: 12px; padding: 10px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                <div style="margin-bottom: 6px;">
+                  <strong style="color: var(--color-primary-active);">🚗 停車資訊：</strong><br>
+                  <span style="color: var(--color-text-muted); font-size: 0.95em;">沒有停車場。</span>
+                </div>
+                <div>
+                  <strong style="color: #2a6f9c;">🧺 洗衣設施：</strong><br>
+                  <span style="color: var(--color-text-muted); font-size: 0.95em;">館內同樣提供自助洗衣與烘衣設備（部分訂房網標示為免費），洗完溫泉可以直接把衣服拿去洗。</span>
+                </div>
+              </div>
             </div>
             <div class="badge-row">
-              <span class="badge hotel">♨️ 北投馥悅溫泉酒店</span>
-              <span class="badge">🚇 捷運前往</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=台北市北投區中山路26號" target="_blank" rel="noopener noreferrer" class="badge hotel">♨️ 北投馥悅溫泉酒店</a>
+              <a href="https://www.google.com/maps/search/?api=1&query=捷運站" target="_blank" rel="noopener noreferrer" class="badge">🚇 捷運前往</a>
             </div>
           </div>
         </div>
@@ -654,7 +686,7 @@
               </div>
             </div>
             <div class="badge-row">
-              <span class="badge food">🌙 士林夜市</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=士林夜市" target="_blank" rel="noopener noreferrer" class="badge food">🌙 士林夜市</a>
             </div>
           </div>
         </div>
@@ -722,10 +754,20 @@
             <div class="timeline-card-body">
               搭捷運前往入住，整理行裝準備旅程最後一天！<br>
               <span style="font-size: 0.85em; color: var(--color-text-faint);">📍 新北市蘆洲區集賢路372號</span>
+              <div style="margin-top: 12px; padding: 10px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                <div style="margin-bottom: 6px;">
+                  <strong style="color: var(--color-primary-active);">🚗 停車資訊：</strong><br>
+                  <span style="color: var(--color-text-muted); font-size: 0.95em;">飯店地下停車場，先到先停，沒位置的話要停隔壁來來停車場（自費）。</span>
+                </div>
+                <div>
+                  <strong style="color: #2a6f9c;">🧺 洗衣設施：</strong><br>
+                  <span style="color: var(--color-text-muted); font-size: 0.95em;">頂樓備有投幣式自助洗衣機與烘乾機。另外，如果您不想自己動手，飯店也有提供付費的客衣送洗/乾洗服務。</span>
+                </div>
+              </div>
             </div>
             <div class="badge-row">
-              <span class="badge hotel">🏨 台北集賢商旅</span>
-              <span class="badge">🚇 捷運前往</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=新北市蘆洲區集賢路372號" target="_blank" rel="noopener noreferrer" class="badge hotel">🏨 台北集賢商旅</a>
+              <a href="https://www.google.com/maps/search/?api=1&query=捷運站" target="_blank" rel="noopener noreferrer" class="badge">🚇 捷運前往</a>
             </div>
           </div>
         </div>
@@ -743,7 +785,7 @@
               </div>
             </div>
             <div class="badge-row">
-              <span class="badge food">🌙 三和夜市</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=三和夜市" target="_blank" rel="noopener noreferrer" class="badge food">🌙 三和夜市</a>
             </div>
           </div>
         </div>
