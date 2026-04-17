@@ -47,7 +47,7 @@
       --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
       --space-4: 1rem;    --space-5: 1.25rem; --space-6: 1.5rem;
       --space-8: 2rem;    --space-10: 2.5rem; --space-12: 3rem;
-      --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+      --text-xs:   clamp(0.7rem,  0.65rem  + 0.25vw, 0.8rem); /* 縮小一點以容納更多導航按鈕 */
       --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
       --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
       --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
@@ -276,7 +276,7 @@
     .btn-group {
       display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3);
     }
-    .call-btn, .map-btn {
+    .call-btn, .map-btn, .action-btn {
       display: inline-flex;
       align-items: center;
       gap: var(--space-2);
@@ -290,6 +290,7 @@
       box-shadow: var(--shadow-sm);
       transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
       min-height: 44px;
+      white-space: nowrap;
     }
     .call-btn { background: var(--color-green); }
     .call-btn:hover { background: #4a9a6c; box-shadow: var(--shadow-md); }
@@ -297,6 +298,9 @@
     .map-btn { background: var(--color-blue); }
     .map-btn:hover { background: #3b8bc2; box-shadow: var(--shadow-md); }
     .map-btn:active { transform: scale(0.97); }
+    .action-btn { background: var(--color-primary); border: none; cursor: pointer; }
+    .action-btn:hover { background: var(--color-primary-hover); box-shadow: var(--shadow-md); }
+    .action-btn:active { transform: scale(0.97); }
 
     /* ===== CHECKLIST ===== */
     .checklist { margin-top: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); }
@@ -325,7 +329,7 @@
       color: transparent;
     }
     .check-item.checked .check-box { background: var(--color-green); border-color: var(--color-green); color: #fff; }
-    .check-label { font-size: var(--text-sm); color: var(--color-text); font-weight: 600; }
+    .check-label { font-size: var(--text-sm); color: var(--color-text); font-weight: 600; flex: 1; }
     .check-item.checked .check-label { color: var(--color-green); text-decoration: line-through; text-decoration-color: rgba(90,172,126,0.5); }
     .progress-pill {
       display: flex; align-items: center; gap: var(--space-3);
@@ -341,6 +345,39 @@
     .progress-bar-bg { flex: 1; height: 8px; background: var(--color-divider); border-radius: var(--radius-full); overflow: hidden; }
     .progress-bar-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-green); transition: width 0.4s ease; }
     .progress-count { color: var(--color-text-muted); white-space: nowrap; }
+
+    /* ===== MEMO SPECIFIC ===== */
+    #page-memo {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100dvh - 200px); /* 自動扣除頂部標題和底部導航欄的空間 */
+    }
+    #page-memo .page-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1; /* 讓內容區塊撐滿整個可用空間 */
+      width: 100%;
+    }
+    #memo-textarea {
+      width: 100%;
+      flex: 1; /* 讓輸入框自動延展填滿所有剩下的長度 */
+      min-height: 200px; /* 給個基本高度防縮太小 */
+      padding: var(--space-4);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: var(--color-surface);
+      color: var(--color-text);
+      line-height: 1.8;
+      resize: none; /* 自動填滿後就不需要手動拉伸了 */
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #memo-textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
 
     /* ===== BADGES ===== */
     .badge-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
@@ -411,7 +448,7 @@
   <div id="page-overview" class="page active">
     <div class="page-content">
       <div class="hero-image-wrap">
-        <img src="all.png" alt="台北4日遊總覽" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy">
+        <img src="all.png" alt="台北4日遊總覽" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy" onerror="this.style.display='none';">
       </div>
 
       <h2 class="overview-title">🗺️ 旅行總覽 MEMO</h2>
@@ -475,11 +512,24 @@
     </div>
   </div>
 
+  <!-- ========== MEMO PAGE ========== -->
+  <div id="page-memo" class="page">
+    <div class="page-content">
+      <h2 class="overview-title">🎒 行李備忘錄</h2>
+      <div class="love-quote" style="background: linear-gradient(135deg, #e6f4fb, #e8fdf0); border-color: #a8d8f0; color: #2a6f9c;">
+        隨手記下要帶的物品清單吧！📝<br>
+        <span style="font-size: var(--text-sm); font-weight: normal; opacity: 0.8;">(紀錄會自動保存在您的瀏覽器中喔！)</span>
+      </div>
+
+      <textarea id="memo-textarea" placeholder="在這裡自由輸入您的行李清單或是任何備忘事項...&#10;例如：&#10;- 換洗衣物 / 襪子&#10;- 手機充電器 / 行動電源&#10;- 常備藥品"></textarea>
+    </div>
+  </div>
+
   <!-- ========== DAY 1 ========== -->
   <div id="page-day1" class="page">
     <div class="page-content">
       <div class="hero-image-wrap">
-        <img src="1.png" alt="第一天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy">
+        <img src="1.png" alt="第一天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy" onerror="this.style.display='none';">
       </div>
 
       <div class="day-header" style="--dc:#f97316;--dc2:#fb923c;">
@@ -610,7 +660,7 @@
   <div id="page-day2" class="page">
     <div class="page-content">
       <div class="hero-image-wrap">
-        <img src="2.png" alt="第二天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy">
+        <img src="2.png" alt="第二天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy" onerror="this.style.display='none';">
       </div>
 
       <div class="day-header" style="--dc:#4a9fd4;--dc2:#38bdf8;">
@@ -718,7 +768,7 @@
   <div id="page-day3" class="page">
     <div class="page-content">
       <div class="hero-image-wrap">
-        <img src="3.png" alt="第三天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy">
+        <img src="3.png" alt="第三天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy" onerror="this.style.display='none';">
       </div>
 
       <div class="day-header" style="--dc:#a855f7;--dc2:#c084fc;">
@@ -822,7 +872,7 @@
   <div id="page-day4" class="page">
     <div class="page-content">
       <div class="hero-image-wrap">
-        <img src="4.png" alt="第四天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy">
+        <img src="4.png" alt="第四天行程" style="max-width:100%;border-radius:1.25rem;margin-bottom:0;" loading="lazy" onerror="this.style.display='none';">
       </div>
 
       <div class="day-header" style="--dc:#22c55e;--dc2:#4ade80;">
@@ -913,6 +963,9 @@
     <button class="nav-tab active" onclick="switchPage('overview',this)" aria-label="總覽">
       <span class="tab-icon">🗺️</span><span>總覽</span>
     </button>
+    <button class="nav-tab" onclick="switchPage('memo',this)" aria-label="備忘錄">
+      <span class="tab-icon">🎒</span><span>行李</span>
+    </button>
     <button class="nav-tab" onclick="switchPage('day1',this)" aria-label="第一天">
       <span class="tab-icon">🚲</span><span>Day 1</span>
     </button>
@@ -937,7 +990,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Checklist state (in-memory, no localStorage)
+    // --- Daily Checklist State (In-Memory) ---
     var checkGroups = {
       day1: { total: 4, checked: 0 },
       day2: { total: 3, checked: 0 }
@@ -976,6 +1029,22 @@
         }
       }
     }
+
+    // --- Dynamic Memo System (LocalStorage - Textarea) ---
+    document.addEventListener('DOMContentLoaded', function() {
+      var memoTextarea = document.getElementById('memo-textarea');
+      if (memoTextarea) {
+        // 載入之前存檔的紀錄
+        var savedMemo = localStorage.getItem('taipeiMemo_text_v1');
+        if (savedMemo) {
+          memoTextarea.value = savedMemo;
+        }
+        // 使用者輸入時自動存檔
+        memoTextarea.addEventListener('input', function() {
+          localStorage.setItem('taipeiMemo_text_v1', this.value);
+        });
+      }
+    });
   </script>
 </body>
 </html>
