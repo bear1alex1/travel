@@ -513,12 +513,155 @@
   </div>
 
   <!-- ========== MEMO PAGE ========== -->
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ⚠️ 請將下方替換為您自己的 Firebase 專案設定
+    const firebaseConfig = {
+      apiKey:            "YOUR_API_KEY",
+      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:         "YOUR_PROJECT_ID",
+      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId:             "YOUR_APP_ID"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    let unsubscribeSnapshot = null;
+
+    // --- UI helpers ---
+    function setStatus(msg, color) {
+      const el = document.getElementById('fb-status');
+      if (el) { el.textContent = msg; el.style.color = color || '#2a6f9c'; }
+    }
+
+    function updateAuthUI(user) {
+      const loginBtn  = document.getElementById('fb-login-btn');
+      const logoutBtn = document.getElementById('fb-logout-btn');
+      const userInfo  = document.getElementById('fb-user-info');
+      const syncNote  = document.getElementById('fb-sync-note');
+      if (user) {
+        loginBtn.style.display  = 'none';
+        logoutBtn.style.display = 'inline-flex';
+        userInfo.textContent    = '👤 ' + (user.displayName || user.email);
+        syncNote.textContent    = '✅ 已登入，備忘錄自動雲端同步中';
+        syncNote.style.color    = '#5aac7e';
+      } else {
+        loginBtn.style.display  = 'inline-flex';
+        logoutBtn.style.display = 'none';
+        userInfo.textContent    = '';
+        syncNote.textContent    = '（未登入，僅儲存於本機瀏覽器）';
+        syncNote.style.color    = '#7a5c46';
+      }
+    }
+
+    // --- Firestore sync ---
+    function startCloudSync(user) {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      const ref = doc(db, 'memos', user.uid);
+      // 即時監聽遠端變更
+      unsubscribeSnapshot = onSnapshot(ref, (snap) => {
+        if (snap.exists()) {
+          const ta = document.getElementById('memo-textarea');
+          if (ta && ta !== document.activeElement) {
+            ta.value = snap.data().text || '';
+          }
+        }
+      });
+    }
+
+    function stopCloudSync() {
+      if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
+    }
+
+    // --- Auth state ---
+    onAuthStateChanged(auth, (user) => {
+      updateAuthUI(user);
+      if (user) {
+        startCloudSync(user);
+      } else {
+        stopCloudSync();
+        // fallback to localStorage
+        const ta = document.getElementById('memo-textarea');
+        if (ta) {
+          const saved = localStorage.getItem('taipeiMemo_text_v1');
+          if (saved) ta.value = saved;
+        }
+      }
+    });
+
+    // --- Textarea input: save to cloud OR localStorage ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const ta = document.getElementById('memo-textarea');
+      if (!ta) return;
+      let saveTimer = null;
+      ta.addEventListener('input', () => {
+        const text = ta.value;
+        localStorage.setItem('taipeiMemo_text_v1', text);
+        const user = auth.currentUser;
+        if (user) {
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(async () => {
+            try {
+              await setDoc(doc(db, 'memos', user.uid), { text });
+              setStatus('☁️ 已同步', '#5aac7e');
+              setTimeout(() => setStatus(''), 2000);
+            } catch(e) {
+              setStatus('⚠️ 同步失敗：' + e.message, '#e07038');
+            }
+          }, 800);
+        }
+      });
+
+      // Google login
+      document.getElementById('fb-login-btn').addEventListener('click', async () => {
+        try {
+          await signInWithPopup(auth, new GoogleAuthProvider());
+        } catch(e) {
+          setStatus('登入失敗：' + e.message, '#e07038');
+        }
+      });
+
+      // Logout
+      document.getElementById('fb-logout-btn').addEventListener('click', async () => {
+        stopCloudSync();
+        await signOut(auth);
+      });
+    });
+  </script>
+
   <div id="page-memo" class="page">
     <div class="page-content">
       <h2 class="overview-title">🎒 行李備忘錄</h2>
+
+      <!-- Firebase 雲端登入區塊 -->
+      <div style="background: linear-gradient(135deg,#e6f4fb,#e8fdf0); border: 1.5px solid #a8d8f0; border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-5); display:flex; flex-direction:column; gap: var(--space-3);">
+        <div style="display:flex; align-items:center; gap: var(--space-3); flex-wrap:wrap;">
+          <button id="fb-login-btn" style="display:inline-flex; align-items:center; gap:0.4rem; background:#fff; border:1.5px solid #4a9fd4; color:#2a6f9c; font-size:var(--text-sm); font-weight:700; padding:0.45rem 1.1rem; border-radius:var(--radius-full); cursor:pointer; transition:background 0.2s;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;" alt="Google"> 使用 Google 登入同步
+          </button>
+          <button id="fb-logout-btn" style="display:none; align-items:center; gap:0.4rem; background:#fff; border:1.5px solid #e07038; color:#a44b1a; font-size:var(--text-sm); font-weight:700; padding:0.45rem 1.1rem; border-radius:var(--radius-full); cursor:pointer;">
+            🚪 登出
+          </button>
+          <span id="fb-user-info" style="font-size:var(--text-sm); color:#2a6f9c; font-weight:600;"></span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-2);">
+          <span id="fb-sync-note" style="font-size:var(--text-xs); color:#7a5c46;">（未登入，僅儲存於本機瀏覽器）</span>
+          <span id="fb-status" style="font-size:var(--text-xs); font-weight:600;"></span>
+        </div>
+      </div>
+
       <div class="love-quote" style="background: linear-gradient(135deg, #e6f4fb, #e8fdf0); border-color: #a8d8f0; color: #2a6f9c;">
         隨手記下要帶的物品清單吧！📝<br>
-        <span style="font-size: var(--text-sm); font-weight: normal; opacity: 0.8;">(紀錄會自動保存在您的瀏覽器中喔！)</span>
+        <span style="font-size: var(--text-sm); font-weight: normal; opacity: 0.8;">登入後可跨裝置同步，未登入則存於本機瀏覽器。</span>
       </div>
 
       <textarea id="memo-textarea" placeholder="在這裡自由輸入您的行李清單或是任何備忘事項...&#10;例如：&#10;- 換洗衣物 / 襪子&#10;- 手機充電器 / 行動電源&#10;- 常備藥品"></textarea>
@@ -963,9 +1106,6 @@
     <button class="nav-tab active" onclick="switchPage('overview',this)" aria-label="總覽">
       <span class="tab-icon">🗺️</span><span>總覽</span>
     </button>
-    <button class="nav-tab" onclick="switchPage('memo',this)" aria-label="備忘錄">
-      <span class="tab-icon">🎒</span><span>行李</span>
-    </button>
     <button class="nav-tab" onclick="switchPage('day1',this)" aria-label="第一天">
       <span class="tab-icon">🚲</span><span>Day 1</span>
     </button>
@@ -1030,21 +1170,7 @@
       }
     }
 
-    // --- Dynamic Memo System (LocalStorage - Textarea) ---
-    document.addEventListener('DOMContentLoaded', function() {
-      var memoTextarea = document.getElementById('memo-textarea');
-      if (memoTextarea) {
-        // 載入之前存檔的紀錄
-        var savedMemo = localStorage.getItem('taipeiMemo_text_v1');
-        if (savedMemo) {
-          memoTextarea.value = savedMemo;
-        }
-        // 使用者輸入時自動存檔
-        memoTextarea.addEventListener('input', function() {
-          localStorage.setItem('taipeiMemo_text_v1', this.value);
-        });
-      }
-    });
+    // Memo save/load is now handled by the Firebase module script above.
   </script>
 </body>
 </html>
